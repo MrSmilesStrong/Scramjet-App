@@ -180,11 +180,27 @@
       doc.body.style.padding = "0";
       doc.body.appendChild(iframe);
 
-      // Redirect original tab if enabled
+      // Close or redirect original tab if enabled
       if (config.redirect.enabled) {
-        const redirectUrl = getRandomRedirectUrl();
-        console.log("Redirecting original tab to:", redirectUrl);
-        window.location.replace(redirectUrl);
+        // Try to close the original tab first
+        window.close();
+        
+        // If closing fails (e.g., tab wasn't opened by script), redirect to new tab page as fallback
+        setTimeout(() => {
+          if (!window.closed) {
+            console.log("Could not close tab, redirecting to new tab page");
+            // Try browser-specific new tab pages, fallback to about:blank
+            try {
+              window.location.replace("chrome://newtab/");
+            } catch (e) {
+              try {
+                window.location.replace("about:newtab");
+              } catch (e2) {
+                window.location.replace("about:blank");
+              }
+            }
+          }
+        }, 100);
       }
 
     } catch (error) {
